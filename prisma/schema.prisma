@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("CASHIER") // ADMIN, CASHIER
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sales     Sale[]
+}
+
+model Fruit {
+  id          Int           @id @default(autoincrement())
+  name        String
+  category    String
+  price       Float         // Price per kg/unit
+  stock       Float         // Stock in kg/unit
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  saleDetails SaleDetail[]
+}
+
+model Sale {
+  id          Int           @id @default(autoincrement())
+  totalAmount Float
+  status      String        @default("COMPLETED") // COMPLETED, PENDING, CANCELLED
+  customerName String?
+  userId      Int
+  user        User          @relation(fields: [userId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  details     SaleDetail[]
+}
+
+model SaleDetail {
+  id        Int      @id @default(autoincrement())
+  saleId    Int
+  sale      Sale     @relation(fields: [saleId], references: [id])
+  fruitId   Int
+  fruit     Fruit    @relation(fields: [fruitId], references: [id])
+  quantity  Float
+  price     Float    // Price at the time of sale
+  subtotal  Float
+}
